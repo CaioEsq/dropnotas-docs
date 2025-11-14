@@ -92,7 +92,7 @@ export UF="RJ"
 ### Criar conta
 
 ```bash
-curl -X POST "$BASE_URL/auth/signup" \
+curl -X POST "$BASE_URL/conta-cliente" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "'"$EMAIL"'",
@@ -104,7 +104,7 @@ curl -X POST "$BASE_URL/auth/signup" \
 
 ```bash
 # Se sua API devolver JSON com { "access_token": "..." }:
-ACCESS_TOKEN=$(curl -s -X POST "$BASE_URL/auth/login" \
+ACCESS_TOKEN=$(curl -s -X POST "$BASE_URL/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "'"$EMAIL"'",
