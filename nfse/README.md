@@ -53,7 +53,7 @@ Antes de chamar `POST /nfse`:
     * `6` MICROEMPRESARIO\_E\_EMPRESA\_DE\_PEQUENO\_PORTE
     * `8` (uso específico do município)
 
-> Sem esses itens, o ACBr/Prefeitura pode rejeitar a emissão.
+> Sem esses itens, a Prefeitura pode rejeitar a emissão.
 
 ---
 Aqui vai um **Quick Start** direto-ao-ponto para sair do zero até **emitir uma NFS-e** criando **Serviço** e **Cliente**
@@ -190,28 +190,79 @@ curl -X POST "$BASE_URL/nfse" \
   -H "Content-Type: application/json" \
   -H "X-AUTH-TOKEN: $API_TOKEN" \
   -d '{
-    "nfse": {
-      "referencia": "'"$UUID_REF"'",
-      "prestadorRps": { "cpfCnpj": "'"$CNPJ_EMPRESA"'" },
-      "tomadorRps": {
-        "cpfCnpj": "98765432000155",
-        "razaoSocial": "Cliente Exemplo LTDA",
-        "endereco": {
-          "logradouro": "Rua B",
-          "numero": "200",
-          "bairro": "Centro",
-          "codigoMunicipio": "'"$CODIGO_MUNICIPIO"'",
-          "uf": "'"$UF"'",
-          "cep": "01001000"
-        }
+"nfse": {
+    "referencia": "'"$UUID_REF"'",
+    "competencia": "2025-07-24",
+    "prestador": {
+      "cpfCnpj": "'"$CNPJ_EMPRESA"'",
+      "inscricao_municipal": "001010",
+      "razao_social": "EMPRESA TESTE LTDA",
+      "nome_fantasia": "EMPRESA TESTE LTDA",
+      "telefone": "2199999999",
+      "email": "empresa@teste.com.br",
+      "prestacao_sus": false,
+      "optante_simples_nacional": true,
+      "incentivo_fiscal": false,
+      "endereco": {
+        "logradouro": "Rua A",
+        "numero": "100",
+        "complemento": "LOJA 05",
+        "bairro": "Centro",
+        "municipio": "MAGE",
+        "codigo_municipio": "3302502",
+        "cep": "250000000",
+        "uf": "RJ",
+        "nome_pais": "BRASIL",
+        "codigo_pais": "1058"
+      }
+    },
+    "regime_especial_tributacao": "NUMERO_8",
+    "servico": {
+      "codigo": "SERV-QUICKSTART-001",
+      "codigo_cnae": "4619200",
+      "discriminacao": "Consultoria de Implantação",
+      "valores": {
+        "base_calculo": 0.01,
+        "valor_servico": 0.01,
+        "aliquota_iss": 2,
+        "aliquota_deducoes": 0,
+        "aliquota_pis": 0,
+        "aliquota_cofins": 0,
+        "aliquota_inss": 0,
+        "aliquota_ir": 0,
+        "aliquota_csll": 0,
+        "aliquota_outras_retencoes": 0,
+        "percentual_desconto_incondicionado": 0,
+        "percentual_desconto_condicionado": 0
       },
-      "servicoRps": {
-        "codigo": "SERV-QUICKSTART-001",
-        "descricao": "Consultoria de Implantação",
-        "valorServicos": 1500.00,
-        "aliquota": 0.02
+      "iss_retido": "SIM",
+      "item_lista_servico": "01.05",
+      "codigo_municipio": "3302502",
+      "numero_processo": "",
+      "exigibilidade_iss": "EXIGIVEL",
+      "responsavel_retencao": "TOMADOR",
+      "municipio_incidencia": "3302502"
+    },
+    "tomador": {
+      "razao_social": "Cliente Exemplo LTDA",
+      "cpf_cnpj": "98765432000155",
+      "contato": {
+        "email": "caio@teste.com.br"
+      },
+      "endereco": {
+        "logradouro": "Rua B",
+        "numero": "200",
+        "complemento": "Loja 02",
+        "bairro": "Centro",
+        "municipio": "Magé ( Vila Inhomirim)",
+        "codigo_municipio": "3302502",
+        "cep": "01001000",
+        "uf": "RJ",
+        "nome_pais": "BRASIL",
+        "codigo_pais": "1058"
       }
     }
+  }
   }'
 ```
 
@@ -240,7 +291,7 @@ curl -X GET "$BASE_URL/nfse/{id}/xml" -H "X-AUTH-TOKEN: $API_TOKEN"
 curl -X GET "$BASE_URL/nfse/{id}/pdf" -H "X-AUTH-TOKEN: $API_TOKEN"
 ```
 
-> Ao baixar `XML`/`PDF`, a API **consulta o lote** e promove para o **resultado de fato** (
+> Ao baixar `XML`/`PDF`, a API **consulta o lote** e promove para o **resultado de fato, caso não tenha sido corrigida anteriormente.** (
 > AUTORIZADA/REJEITADA/PROCESSANDO).
 
 ---
@@ -248,8 +299,8 @@ curl -X GET "$BASE_URL/nfse/{id}/pdf" -H "X-AUTH-TOKEN: $API_TOKEN"
 ## Dicas rápidas / erros comuns
 
 * **409 (Conflito)**: emissão duplicada nos últimos 5 min (mesmo **prestador+tomador+serviço**).
-* **E10 (RPS já informado)**: a API sugere **próxima numeração** automaticamente.
-* **PROCESSANDO**: tente `/xml` ou `/pdf` novamente para promover o estado.
+* **E10 (RPS já informado)**: a API sugere **próxima numeração** automaticamente, se a requisição for refeita, o próprio sistema já substitui, no caso da sequência estiver incorreta, deve-se alterar a propriedade "proximo_numero_rps" da Empresa cadastrada.
+* **PROCESSANDO**: tente fazer um get `/{id}`, `/xml`, `/pdf` novamente para atualizar seu estado.
 * Em **Cancelamento**, `POST /nfse/cancelar` é **lógico interno** (sem integração com prefeitura) — em Magé não há
   cancelamento via API.
 * Mais detalhes na seção abaixo.
